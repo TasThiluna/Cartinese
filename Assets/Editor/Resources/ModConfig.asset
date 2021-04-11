@@ -14,7 +14,9 @@ MonoBehaviour:
   id: cartinese
   title: Cartinese
   author: TasThing
-  description: In A9 I Milly Rock...
+  description: "In A9 I Milly Rock...\r\n\r\nModule idea by Vincology, implementation
+    by TasThing.\r\n\r\nManual HTML: https://ktane.timwi.de/HTML/Cartinese.html\r\nManual
+    PDF: https://ktane.timwi.de/PDF/Cartinese.pdf"
   version: 
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 806344f86e42a6e44b0ed3ca7a1bdae5, type: 3}

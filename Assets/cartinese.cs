@@ -115,13 +115,13 @@ public class cartinese : MonoBehaviour
                 buttonScores[i] += 2;
             if (Array.IndexOf(lyrics, lyric) % 2 == 0)
                 buttonScores[i] += 2;
-            if (lyric.Count(x => vowels.Contains(x)) % 2 == 0)
+            if (lyric.ToUpperInvariant().Count(x => vowels.Contains(x)) % 2 == 0)
                 buttonScores[i] += 2;
             if (color == 2)
                 buttonScores[i] += 3;
             if (i == 1)
                 buttonScores[i] += 3;
-            if (!vowels.Contains(lyric.Last()))
+            if (!vowels.Contains(lyric.ToUpperInvariant().Last()))
                 buttonScores[i] += 3;
         }
         var stanzas = buttonLyrics.Select(x => Array.IndexOf(lyrics, x) / 4).ToArray();
@@ -205,6 +205,7 @@ public class cartinese : MonoBehaviour
             module.HandleStrike();
             Debug.LogFormat("[Cartinese #{0}] That was incorrect (expected {1}). Strike!", moduleId, Coordinate(endingLocation));
             audio.PlaySoundAtTransform("strike", transform);
+            currentLocation = startingLocation;
         }
     }
 
@@ -311,6 +312,89 @@ public class cartinese : MonoBehaviour
     private static string Coordinate(int pos)
     {
         return "ABCDE"[pos % 5] + ((pos / 5) + 1).ToString();
+    }
+
+    // Twitch Plays
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = "!{0} <up/down/left/right> [Presses those play buttons. Can be chained, and the first letter of each direction also works.] !{0} <u/d/l/r/> fast [Presses those play buttons, without giving extra time inbetween each press.} !{0} submit [Presses the display.] !{0} reset [Returns to the starting position.]";
+#pragma warning restore 414
+
+    IEnumerator ProcessTwitchCommand(string input)
+    {
+        input = input.ToLowerInvariant().Trim();
+        var directions = new string[] { "up", "right", "down", "left", "u", "r", "d", "l" };
+        if (input == "submit")
+        {
+            yield return null;
+            screen.OnInteract();
+        }
+        else if (input == "reset")
+        {
+            yield return null;
+            audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.TitleMenuPressed, transform);
+            currentLocation = startingLocation;
+        }
+        else if (input.Split(' ').Take(input.Split(' ').Length - 1).All(x => directions.Contains(x)) || input.Split(' ').All(y => directions.Contains(y)))
+        {
+            if (input.Split(' ').Last() != "fast" && !directions.Contains(input.Split(' ').Last()))
+                yield break;
+            yield return null;
+            var betweenTime = input.Split(' ').Last() == "fast" ? .25f : 1.5f;
+            foreach (string str in input.Split(' '))
+            {
+                if (str == "fast")
+                    continue;
+                switch (str)
+                {
+                    case "up":
+                    case "u":
+                        buttons[0].OnInteract();
+                        break;
+                    case "right":
+                    case "r":
+                        buttons[1].OnInteract();
+                        break;
+                    case "down":
+                    case "d":
+                        buttons[2].OnInteract();
+                        break;
+                    case "left":
+                    case "l":
+                        buttons[3].OnInteract();
+                        break;
+                    default:
+                        yield break;
+                }
+                yield return new WaitForSeconds(betweenTime);
+            }
+        }
+        else
+            yield break;
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        yield return null;
+        var horizButton = 5;
+        var vertiButton = 5;
+        for (int i = 0; i < 4; i++)
+        {
+            if ((buttonDirections[i] == 0 || buttonDirections[i] == 2) && vertiButton == 5)
+                vertiButton = i;
+            if ((buttonDirections[i] == 1 || buttonDirections[i] == 3) && horizButton == 5)
+                horizButton = i;
+        }
+        while (currentLocation % 5 != endingLocation % 5)
+        {
+            yield return new WaitForSeconds(.25f);
+            buttons[horizButton].OnInteract();
+        }
+        while (currentLocation / 5 != endingLocation / 5)
+        {
+            yield return new WaitForSeconds(.25f);
+            buttons[vertiButton].OnInteract();
+        }
+        screen.OnInteract();
     }
 
 }
