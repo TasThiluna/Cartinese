@@ -273,7 +273,7 @@ public class cartinese : MonoBehaviour
     private IEnumerator Rotate()
     {
         var isCcw = rnd.Range(0, 2) == 0;
-        var pivot = new GameObject("pivot"); // All this nonsense accounts for the fact that the text is moved downwards, to account for the font which has the * character higher up than I'd like it
+        var pivot = new GameObject("pivot"); // This nonsense accounts for the fact that the text is moved downwards, to account for the font which has the * character higher up than I'd like it
         pivot.transform.SetParent(screen.transform, false);
         screenText.transform.parent = pivot.transform;
         var rotation = 0f;
@@ -316,7 +316,7 @@ public class cartinese : MonoBehaviour
 
     // Twitch Plays
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = "!{0} <up/down/left/right> [Presses those play buttons. Can be chained, and the first letter of each direction also works.] !{0} <u/d/l/r/> fast [Presses those play buttons, without giving extra time inbetween each press.} !{0} submit [Presses the display.] !{0} reset [Returns to the starting position.]";
+    private readonly string TwitchHelpMessage = "!{0} <up/down/left/right> [Presses those play buttons. Can be chained, and the first letter of each direction also works.] !{0} <u/d/l/r/> fast [Presses those play buttons, without giving extra time inbetween each press.] !{0} submit [Presses the display.] !{0} reset [Returns to the starting position.]";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string input)
