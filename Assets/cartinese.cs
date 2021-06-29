@@ -20,6 +20,7 @@ public class cartinese : MonoBehaviour
     public TextMesh screenText;
     public Font solveFont;
     public Material solveMat;
+    public TextMesh[] colorblindTexts;
 
     private int[] buttonColors = new int[4];
     private string[] buttonLyrics = new string[4];
@@ -87,47 +88,91 @@ public class cartinese : MonoBehaviour
         foreach (KMSelectable button in buttons)
             button.OnInteract += delegate () { PressButton(button); return false; };
         screen.OnInteract += delegate () { PressScreen(); return false; };
+        foreach (GameObject text in colorblindTexts.Select(x => x.gameObject))
+            text.SetActive(GetComponent<KMColorblindMode>().ColorblindModeActive);
     }
 
     void Start()
     {
         endingLocation = rnd.Range(0, 25);
         var consonantCounts = new int[4];
+        var appliedConditions = new List<List<string>>();
     tryAgain:
+        appliedConditions.Clear();
+        buttonScores = Enumerable.Repeat(0, 4).ToArray();
         buttonColors = Enumerable.Range(0, 4).ToList().Shuffle().ToArray();
         for (int i = 0; i < 4; i++)
         {
             var lyric = lyrics.PickRandom();
             var color = buttonColors[i];
+            colorblindTexts[i].text = "RYGB"[color].ToString();
             buttonLyrics[i] = lyric;
             consonantCounts[i] = lyric.ToUpperInvariant().Count(x => !vowels.Contains(x));
+            appliedConditions.Add(new List<string>());
+            var theseConditions = appliedConditions[i];
             if (color == 0)
+            {
                 buttonScores[i]++;
+                theseConditions.Add("red");
+            }
             if (i == 2)
+            {
                 buttonScores[i]++;
+                theseConditions.Add("bottom");
+            }
             if (Array.IndexOf(lyrics, lyric) % 2 == 1)
+            {
                 buttonScores[i]++;
+                theseConditions.Add("even position");
+            }
             if (lyric.Count() >= 10)
+            {
                 buttonScores[i]++;
+                theseConditions.Add("10 or more letters");
+            }
             if (color == 1)
+            {
                 buttonScores[i] += 2;
+                theseConditions.Add("yellow");
+            }
             if (i == 3)
+            {
                 buttonScores[i] += 2;
+                theseConditions.Add("left");
+            }
             if (Array.IndexOf(lyrics, lyric) % 2 == 0)
+            {
                 buttonScores[i] += 2;
+                theseConditions.Add("odd position");
+            }
             if (lyric.ToUpperInvariant().Count(x => vowels.Contains(x)) % 2 == 0)
+            {
                 buttonScores[i] += 2;
+                theseConditions.Add("even vowel count");
+            }
             if (color == 2)
+            {
                 buttonScores[i] += 3;
+                theseConditions.Add("green");
+            }
             if (i == 1)
+            {
                 buttonScores[i] += 3;
+                theseConditions.Add("right");
+            }
             if (!vowels.Contains(lyric.ToUpperInvariant().Last()))
+            {
                 buttonScores[i] += 3;
+                theseConditions.Add("ends in consonant");
+            }
         }
         var stanzas = buttonLyrics.Select(x => Array.IndexOf(lyrics, x) / 4).ToArray();
         for (int i = 0; i < 4; i++)
             if (stanzas.Count(x => x == stanzas[i]) == 1)
+            {
                 buttonScores[i] += 3;
+                appliedConditions[i].Add("unique stanza");
+            }
         var directions = new int[] { 0, 1, 3, 2 };
         var table = new int[] { 1, 0, 3, 2, 2, 3, 0, 1, 0, 1, 2, 3, 3, 2, 1, 0 };
         for (int i = 0; i < 4; i++)
@@ -136,6 +181,8 @@ public class cartinese : MonoBehaviour
             goto tryAgain;
         Debug.LogFormat("[Cartinese #{0}] Button Colors: {1}", moduleId, buttonColors.Select(x => colorNames[x]).Join(", "));
         Debug.LogFormat("[Cartinese #{0}] Lyrics played by each button: {1}", moduleId, buttonLyrics.Join(", "));
+        for (int i = 0; i < 4; i++)
+            Debug.LogFormat("[Cartinese #{0}] Conditions for the {1} button: {2}", moduleId, directionNames[i], appliedConditions[i].Join(", "));
         Debug.LogFormat("[Cartinese #{0}] Scores for each button: {1}", moduleId, buttonScores.Join(", "));
         Debug.LogFormat("[Cartinese #{0}] Direction assigned to each button: {1}", moduleId, buttonDirections.Select(x => directionNames[x]).Join(", "));
         startingLocation = (bomb.GetSerialNumberNumbers().Sum() + consonantCounts.Sum()) % 25;
@@ -196,6 +243,8 @@ public class cartinese : MonoBehaviour
             easterEggUsed = false;
             audio.PlaySoundAtTransform("solve", transform);
             Debug.LogFormat("[Cartinese #{0}] That was correct. Module solved!", moduleId);
+            foreach (TextMesh t in colorblindTexts)
+                t.text = "";
             StopAllCoroutines();
             StartCoroutine(SolveAnimation());
             StartCoroutine(ColorButtons());
