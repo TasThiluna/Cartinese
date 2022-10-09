@@ -1714,7 +1714,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cadefbb4e8c0c743893b8a7efee5ac5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _colorblindMode: 0
+  _colorblindMode: 1
 --- !u!114 &114473560378577232
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1840,7 +1840,7 @@ MonoBehaviour:
   - {fileID: 114139534065469138}
   - {fileID: 0}
   IsPassThrough: 0
-  ChildRowLength: 0
+  ChildRowLength: 3
   Highlight: {fileID: 114481041003132964}
   SelectableColliders: []
   DefaultSelectableIndex: 0
