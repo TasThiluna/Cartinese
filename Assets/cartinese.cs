@@ -167,12 +167,20 @@ public class cartinese : MonoBehaviour
             }
         }
         var stanzas = buttonLyrics.Select(x => Array.IndexOf(lyrics, x) / 4).ToArray();
-        for (int i = 0; i < 4; i++)
-            if (stanzas.Count(x => x == stanzas[i]) == 1)
+        var indexes = buttonLyrics.Select(x => Array.IndexOf(lyrics, x) % 4).ToArray();
+        for (int i = 0; i < 4; i++) {
+            var count = 0;
+            for (int j = 0; j < 4; j++) {
+                if (stanzas[i] == stanzas[j] && indexes[i] != indexes[j]) {
+                    count++;
+                }
+            }
+            if (count == 0)
             {
                 buttonScores[i] += 3;
                 appliedConditions[i].Add("unique stanza");
             }
+        }
         var directions = new int[] { 0, 1, 3, 2 };
         var table = new int[] { 1, 0, 3, 2, 2, 3, 0, 1, 0, 1, 2, 3, 3, 2, 1, 0 };
         for (int i = 0; i < 4; i++)
