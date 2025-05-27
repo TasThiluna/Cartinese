@@ -76,6 +76,7 @@ public class cartinese : MonoBehaviour
         "ima thief in the night"
     };
     private static readonly string vowels = "AEIOU";
+    private static readonly string[] ysThatAreConsonants = new string[] { "2-1", "3-10", "6-8" };
 
     private static int moduleIdCounter = 1;
     private int moduleId;
@@ -107,7 +108,7 @@ public class cartinese : MonoBehaviour
             var color = buttonColors[i];
             colorblindTexts[i].text = "RYGB"[color].ToString();
             buttonLyrics[i] = lyric;
-            consonantCounts[i] = lyric.ToUpperInvariant().Count(x => !vowels.Contains(x));
+            consonantCounts[i] = lyric.ToUpperInvariant().Select((x, ix) => new { letter = x, index = ix }).Count(x => x.letter == 'Y' ? ysThatAreConsonants.Contains(Array.IndexOf(lyrics, lyric) + "-" + x.index) : !vowels.Contains(x.letter));
             appliedConditions.Add(new List<string>());
             var theseConditions = appliedConditions[i];
             if (color == 0)
@@ -168,10 +169,13 @@ public class cartinese : MonoBehaviour
         }
         var stanzas = buttonLyrics.Select(x => Array.IndexOf(lyrics, x) / 4).ToArray();
         var indexes = buttonLyrics.Select(x => Array.IndexOf(lyrics, x) % 4).ToArray();
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             var count = 0;
-            for (int j = 0; j < 4; j++) {
-                if (stanzas[i] == stanzas[j] && indexes[i] != indexes[j]) {
+            for (int j = 0; j < 4; j++)
+            {
+                if (stanzas[i] == stanzas[j] && indexes[i] != indexes[j])
+                {
                     count++;
                 }
             }
@@ -274,13 +278,39 @@ public class cartinese : MonoBehaviour
         {
             switch (c)
             {
-                case '_':
-                    screenText.text = "_";
-                    screenText.transform.localPosition = new Vector3(0f, 1f, .044f);
+                case 'E':
+                case 'F':
+                case 'T':
+                case 'V':
+                case 'W':
+                case 'X':
+                    screenText.text = c.ToString();
+                    screenText.transform.localPosition = new Vector3(.058f, 1f, -.024f);
+                    break;
+                case 'g':
+                case 'j':
+                case 'p':
+                case 'q':
+                case 's':
+                case 'y':
+                    screenText.text = c.ToString();
+                    screenText.transform.localPosition = new Vector3(.058f, 1f, .118f);
+                    break;
+                case 'z':
+                    screenText.text = c.ToString();
+                    screenText.transform.localPosition = new Vector3(.043f, 1f, .059f);
+                    break;
+                case '.':
+                    screenText.text = c.ToString();
+                    screenText.transform.localPosition = new Vector3(.009f, 1f, .118f);
+                    break;
+                case '*':
+                    screenText.text = c.ToString();
+                    screenText.transform.localPosition = new Vector3(.990f, 1f, -.234f);
                     break;
                 default:
                     screenText.text = c.ToString();
-                    screenText.transform.localPosition = new Vector3(0f, 1f, -.107f);
+                    screenText.transform.localPosition = new Vector3(0f, 1f, 0f);
                     break;
             }
             yield return new WaitForSeconds(1f);
@@ -322,7 +352,7 @@ public class cartinese : MonoBehaviour
         for (int i = 0; i < 100; ++i)
         {
             screenText.color = Color.HSVToRGB((startColor + (i * 0.01f)) % 1.0f, 1.0f, 1.0f);
-            yield return new WaitForSeconds(0.025f);
+            yield return new WaitForSeconds(0.005f);
         }
         goto restartCycle;
     }
@@ -376,7 +406,7 @@ public class cartinese : MonoBehaviour
     private readonly string TwitchHelpMessage = "!{0} <up/down/left/right> [Presses those play buttons. Can be chained, and the first letter of each direction also works.] !{0} <u/d/l/r/> fast [Presses those play buttons, without giving extra time inbetween each press.] !{0} submit [Presses the display.] !{0} reset [Returns to the starting position.]";
 #pragma warning restore 414
 
-    IEnumerator ProcessTwitchCommand(string input)
+    private IEnumerator ProcessTwitchCommand(string input)
     {
         input = input.ToLowerInvariant().Trim();
         var directions = new string[] { "up", "right", "down", "left", "u", "r", "d", "l" };
@@ -429,7 +459,7 @@ public class cartinese : MonoBehaviour
             yield break;
     }
 
-    IEnumerator TwitchHandleForcedSolve()
+    private IEnumerator TwitchHandleForcedSolve()
     {
         yield return null;
         var horizButton = 5;
