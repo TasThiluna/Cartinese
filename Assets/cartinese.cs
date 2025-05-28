@@ -91,6 +91,7 @@ public class cartinese : MonoBehaviour
         screen.OnInteract += delegate () { PressScreen(); return false; };
         foreach (GameObject text in colorblindTexts.Select(x => x.gameObject))
             text.SetActive(GetComponent<KMColorblindMode>().ColorblindModeActive);
+        module.OnActivate += delegate () { audio.PlaySoundAtTransform("wake up filthy", transform); };
     }
 
     void Start()
@@ -305,8 +306,13 @@ public class cartinese : MonoBehaviour
                     screenText.transform.localPosition = new Vector3(.009f, 1f, .118f);
                     break;
                 case '*':
+                case '_':
                     screenText.text = c.ToString();
-                    screenText.transform.localPosition = new Vector3(.990f, 1f, -.234f);
+                    screenText.transform.localPosition = new Vector3(.009f, 1f, -.234f);
+                    break;
+                case '/':
+                    screenText.text = c.ToString();
+                    screenText.transform.localPosition = new Vector3(.009f, 1f, -.023f);
                     break;
                 default:
                     screenText.text = c.ToString();
